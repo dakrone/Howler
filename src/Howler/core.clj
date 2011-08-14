@@ -1,6 +1,5 @@
 (ns Howler.core
-  (:use [Howler.parser :only [parse-irc-line]]
-        [clojure.java.io :only [file]])
+  (:use [clojure.java.io :only [file]])
   (:require [clj-growl.core :as clj-growl])
   (:import (com.xerox.amazonws.sqs2 MessageQueue
                                     Message
@@ -52,6 +51,8 @@
       (catch Exception e
         [nil e]))))
 
+(def ^{:dynamic true} *parser* identity)
+
 (defmethod -main "-produce" [x queue-name aws-key aws-secret-key filename]
   (let [rdr (doto (-> filename FileReader. BufferedReader.)
               (-> (.skip (.length (File. filename)))))]
@@ -62,7 +63,7 @@
                                 queue-name))
             (queue-line! [queue]
               (Thread/sleep 500)
-              (when-let [line (parse-irc-line (.readLine rdr))]
+              (when-let [line (*parser* (.readLine rdr))]
                 (let [ts (System/currentTimeMillis)]
                   (.sendMessage queue (-> line (assoc :timestamp ts) pr-str))))
               queue)

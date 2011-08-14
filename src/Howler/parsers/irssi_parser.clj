@@ -1,8 +1,10 @@
-(ns Howler.parser
+(ns Howler.parsers.irssi-parser
   (:use [name.choi.joshua.fnparse]))
 
+(def rawlog "/Users/hiredman/raw.log")
+
 (defn f []
-  (with-open [x (-> "/Users/hiredman/raw.log"
+  (with-open [x (-> rawlog
                     java.io.FileReader.
                     java.io.BufferedReader.)]
     (doall (line-seq x))))
